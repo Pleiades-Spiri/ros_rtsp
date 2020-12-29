@@ -117,6 +117,7 @@ GstCaps* Image2RTSPNodelet::gst_caps_new_from_image(const sensor_msgs::Image::Co
 
 void Image2RTSPNodelet::imageCallback(const sensor_msgs::Image::ConstPtr& msg, const std::string& topic) {
     GstBuffer *buf;
+    std::cout << "image msg recieved" << std::endl;
 
     GstCaps *caps;
     char *gst_type, *gst_format=(char *)"";
@@ -137,6 +138,7 @@ void Image2RTSPNodelet::imageCallback(const sensor_msgs::Image::ConstPtr& msg, c
 
 void Image2RTSPNodelet::url_connected(string url) {
     std::string mountpoint, source, type;
+    std::cout << " url : " << url << std::endl;
 
     NODELET_INFO("Client connected: %s", url.c_str());
     ros::NodeHandle& nh = getPrivateNodeHandle();
@@ -153,17 +155,21 @@ void Image2RTSPNodelet::url_connected(string url) {
         type = static_cast<std::string>(stream["type"]);
         mountpoint = static_cast<std::string>(stream["mountpoint"]);
         source = static_cast<std::string>(stream["source"]);
-
+        std::cout << "mountpoint : " << mountpoint << std::endl;
+        std::cout << "type :" << type << std::endl;
         // Check which stream the client has connected to
         if (type=="topic" && url==mountpoint) {
 
             if (num_of_clients[url]==0) {
                 // Subscribe to the ROS topic
+                std::cout << "Subscriber subscribed to source " << source << std::endl;
                 subs[url] = nh.subscribe<sensor_msgs::Image>(source, 1, boost::bind(&Image2RTSPNodelet::imageCallback, this, _1, url));
             }
             num_of_clients[url]++;
         }
     }
+    std::cout << "Subscribers set" << std::endl;
+    std::cout << subs[url] << std::endl;
 }
 
 void Image2RTSPNodelet::url_disconnected(string url) {
